@@ -177,3 +177,22 @@ class Test_Stock_StockProduct_Relationship():
         stock.delete()
         assert not StockProduct.query.all()
         assert not Stock.query.all()
+
+
+class Test_StockProduct_Product_Relationship():
+    def test_product_delete_cascades_to_stock_products(self, database):
+        stock = Stock(name='Stock')
+        product = Product(name='Product')
+        stock_product_1 = StockProduct(stock=stock,
+                                       product=product,
+                                       lot_number='Lot 1')
+        stock_product_2 = StockProduct(stock=stock,
+                                       product=product,
+                                       lot_number='Lot 2')
+        product.create()
+        assert len(StockProduct.query.all()) is 2
+        assert stock_product_1.product_id is product.id
+        assert stock_product_2.product_id is product.id
+        product.delete()
+        assert not StockProduct.query.all()
+        assert not Product.query.all()
