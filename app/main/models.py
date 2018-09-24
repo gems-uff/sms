@@ -126,7 +126,7 @@ class OrderItem(Base):
     lot_number = Column(String(255), nullable=False)
     expiration_date = Column(
         Date, default=datetime.utcnow().date, nullable=True)
-    # TODO: rename it to checked_out
+    # TODO: delete it (unused)
     added_to_stock = Column(Boolean, default=False, nullable=True)
     # Relationships
     # TODO: rename to specification

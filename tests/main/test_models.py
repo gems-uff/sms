@@ -1,8 +1,13 @@
+from datetime import datetime
+
 import pytest
 import sqlalchemy.exc as sqlexc
 
 from app.extensions import db
-from app.main.models import Base, Product, Specification, Stock, StockProduct
+
+from app.auth.models import User
+from app.main.models import (
+    Base, Product, Specification, Stock, StockProduct, Order, OrderItem)
 
 
 class TestBase():
@@ -196,3 +201,83 @@ class Test_StockProduct_Product_Relationship():
         product.delete()
         assert not StockProduct.query.all()
         assert not Product.query.all()
+
+
+class Test_Order():
+    def test_save_order_to_database(self, database):
+        order = Order()
+        db.session.add(order)
+        db.session.commit()
+        order.order_date <= datetime.utcnow()
+
+
+class Test_Order_OrderItem_Relationship():
+    def test_delete_order_cascades_to_order_items(self, database):
+        order = Order()
+        product = Product(name='Product')
+        specification = Specification(product=product)
+        order_item_1 = OrderItem(item=specification,
+                                 order=order,
+                                 lot_number='lot_1')
+        order_item_2 = OrderItem(item=specification,
+                                 order=order,
+                                 lot_number='lot_2')
+        order.create()
+        assert len(order.order_items) is 2
+        assert order_item_1.order_id is order.id
+        assert order_item_2.order_id is order.id
+        order.delete()
+        assert not OrderItem.query.all()
+
+
+class Test_Order_User_Relationship():
+    def test_delete_user_cascades_setnull(self, database):
+        order = Order()
+        user = User(email='user@user.com')
+        order.user = user
+        db.session.add(order)
+        db.session.commit()
+        assert order.user_id is user.id
+        assert order.user is user
+        db.session.delete(user)
+        db.session.commit()
+        assert order.user is None
+        assert order.user_id is None
+
+
+class Test_OrderItem():
+    def test_unique_order_item_constraint(self, database):
+        order = Order()
+        product = Product(name='Product')
+        specification = Specification(product=product)
+        order_item_1 = OrderItem(
+            item=specification, order=order, lot_number='lot_1')
+        order_item_2 = OrderItem(
+            item=specification, order=order, lot_number='lot_1')
+        db.session.add(order_item_1)
+        db.session.add(order_item_2)
+        with pytest.raises(sqlexc.IntegrityError,
+                           match=r'.*unique_order_item.*'):
+            db.session.commit()
+        db.session.rollback()
+        order_item_2.lot_number = 'lot_2'
+        db.session.add(order_item_1)
+        db.session.add(order_item_2)
+        db.session.commit()
+        assert order_item_1.lot_number == 'lot_1'
+        assert order_item_2.lot_number == 'lot_2'
+
+
+class Test_OrderItem_Specification_Relationship():
+    def test_delete_specification_cascades_setnull(self, database):
+        order = Order()
+        product = Product(name='Product')
+        specification = Specification(product=product)
+        order_item = OrderItem(
+            item=specification, order=order, lot_number='lot')
+        db.session.add(order)
+        db.session.commit()
+        assert order_item.item_id is specification.id
+        specification.delete()
+        assert order_item.item_id is None
+        assert order_item.item is None
