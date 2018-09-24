@@ -1,0 +1,6 @@
+pylint
+rope
+jedi
+autopep8
+ipdb
+pytest

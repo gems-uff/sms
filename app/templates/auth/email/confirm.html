@@ -1,0 +1,7 @@
+<p>Prezado usuário,</p>
+<p>Para confirmar sua conta <a href="{{ url_for('auth.confirm', token=token, _external=True) }}">clique aqui</a>.</p>
+<p>Se preferir, cole o link a seguir na barra seu browser:</p>
+<p>{{ url_for('auth.confirm', token=token, _external=True) }}</p>
+<p>Atenciosamente,</p>
+<p>Administração</p>
+<p><small>Importante: respostas a esse e-mail não são monitoradas.</small></p>

@@ -1,0 +1,11 @@
+Prezado usuario,
+
+Para confirmar sua conta, clique no link a seguir:
+
+{{ url_for('auth.confirm', token=token, _external=True) }}
+
+Atenciosamente,
+
+Administração
+
+Importante:respostas a esse e-mail não são monitoradas.

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flask Layout{% endblock %}
+
+{% block page_content %}
+  <div class="page-header">
+    <h1>Criar usuário</h1>
+  </div>
+  <div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+    <p class="text-muted">
+      Já possui conta?
+      <a href="{{ url_for('auth.login') }}">
+        Clique aqui para acessar.
+      </a>
+    </p>
+  </div>
+{% endblock %}
