@@ -281,3 +281,15 @@ class Test_OrderItem_Specification_Relationship():
         specification.delete()
         assert order_item.item_id is None
         assert order_item.item is None
+
+
+class Test_Transaction_Relationships():
+    # TODO: tests for transaction
+    def test_user():
+        pass
+
+    def test_product():
+        pass
+
+    def test_stock():
+        pass
