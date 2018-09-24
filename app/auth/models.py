@@ -83,7 +83,7 @@ class User(UserMixin, db.Model):
             if u.is_administrator() and u.stock_mail_alert
         ]
 
-    def can(self, permissions):
+    def can(self, permissions: int):
         return self.role is not None and \
             (self.role.permissions & permissions) == permissions
 
