@@ -2,10 +2,10 @@ import pytest
 import sqlalchemy.exc as sqlexc
 
 from app.extensions import db
-from app.main.models import Product, Specification
+from app.main.models import Product, Specification, Stock, StockProduct
 
 
-class TestProduct():
+class Test_Product():
     def test_product_name_not_null(self, database):
         name = None
         p1 = Product(name=name)
@@ -31,14 +31,14 @@ class TestProduct():
         assert p1.stock_minimum is 1
 
 
-class TestSpecification():
+class Test_Specification():
     def test_units_default_is_one(self, database):
         p1 = Product(name='Product').create()
         spec1 = Specification(product_id=p1.id).create()
         assert spec1.units is 1
 
 
-class TestProductSpecificationRelationship():
+class Test_Product_Specification_Relationship():
     def test_specification_is_deleted_if_orphan(self, database):
         parent = Product(name='Product')
         child_1 = Specification(product=parent)
@@ -68,3 +68,29 @@ class TestProductSpecificationRelationship():
         child_2.product = Product(name='Another Product')
         child_2.create()
         assert child_2.product_id is not None
+
+
+class Test_Stock():
+    def test_stock_name_not_null(self, database):
+        name = None
+        stock = Stock(name=name)
+        db.session.add(stock)
+        with pytest.raises(sqlexc.IntegrityError):
+            db.session.commit()
+
+    def test_stock_name_unique(self, database):
+        name = 'Stock Name'
+        stock_1 = Stock(name=name)
+        stock_2 = Stock(name=name)
+        db.session.add(stock_1)
+        db.session.add(stock_2)
+        with pytest.raises(sqlexc.IntegrityError):
+            db.session.commit()
+
+
+class Test_StockProduct():
+    pass
+
+
+class Test_Stock_StockProduct_Relationship():
+    pass
