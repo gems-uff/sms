@@ -1,9 +1,6 @@
-import os
-
 from flask import url_for, request, current_app
 
-from app.extensions import db as database
-from app.auth.models import User, Role
+from app.auth.models import User
 
 
 def test_register_and_login(client):

@@ -3,10 +3,12 @@ import click
 
 def register_commands(app):
     from app.extensions import db
+    import app.auth as auth
+    import app.main as main
 
     @app.shell_context_processor
     def make_shell_context():
-        return {'db': db}
+        return {'db': db, 'main': main, 'auth': auth}
 
     @app.cli.command()
     def deploy():
