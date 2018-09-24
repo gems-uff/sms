@@ -23,6 +23,9 @@ def register_commands(app):
         Role.insert_roles()
         User.insert_admin()
         app.logger.info('Admin user and roles created successfully')
+        from app.main.models import Stock
+        Stock.insert_main_stock()
+        app.logger.info('main stock created successfully')
 
     @app.cli.command('t')
     @click.option('--pdb', is_flag=True, help='Enable pdb fallback')

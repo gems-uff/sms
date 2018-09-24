@@ -77,6 +77,12 @@ class Stock(Base):
                                   cascade='all, delete-orphan',
                                   back_populates='stock')
 
+    @staticmethod
+    def insert_main_stock():
+        stock = Stock.query.filter_by(name='main').first()
+        if not stock:
+            stock = Stock(name='main').create()
+
 
 class StockProduct(Base):
     __tablename__ = 'stock_products'
