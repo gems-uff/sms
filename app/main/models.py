@@ -26,7 +26,10 @@ class Product(Base):
     name = Column(String(128), nullable=False, unique=True)
     stock_minimum = Column(Integer, default=1, nullable=False)
     # Relationships
-    specifications = relationship('Specification', back_populates='product')
+    specifications = relationship('Specification',
+        cascade='all, delete-orphan',
+        back_populates='product',
+    )
 
 
 class Specification(Base):
@@ -42,8 +45,4 @@ class Specification(Base):
     catalog_number = Column(String(128), nullable=True)
     units = Column(Integer, default=1, nullable=False)
     # Relationships
-    product = relationship(
-        'Product',
-        back_populates='specifications',
-        cascade='all, delete-orphan',
-        single_parent=True)
+    product = relationship('Product', back_populates='specifications')
