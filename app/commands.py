@@ -25,7 +25,8 @@ def register_commands(app):
         app.logger.info('Admin user and roles created successfully')
 
     @app.cli.command('t')
-    @app.cli.command('tst')
+    @click.option('--pdb', is_flag=True, help='Enable pdb fallback')
+    @click.option('--cov', is_flag=True, help='Enable code coverage')
     @app.cli.command('test')
     @click.option('--pdb', is_flag=True, help='Enable pdb fallback')
     @click.option('--cov', is_flag=True, help='Enable code coverage')
@@ -36,8 +37,8 @@ def register_commands(app):
             args += ['--pdb']
         if cov:
             args += [
-                '--cov=app', 'tests/',
                 '--cov-config', '.coveragerc',
+                '--cov=app', 'tests/',
                 '--cov-report', 'term',
             ]
         else:

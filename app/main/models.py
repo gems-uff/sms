@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, ForeignKey
+from sqlalchemy import (Column, Integer, String, DateTime, UniqueConstraint,
+                        ForeignKey)
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import Model
 
@@ -10,6 +11,16 @@ from app.extensions import db
 class Base(db.Model):
     __abstract__ = True
     id = Column(Integer, primary_key=True)
+
+    def create(self):
+        db.session.add(self)
+        db.session.commit()
+        return self
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        return self
 
 
 class TimeStampedModelMixin(db.Model):
@@ -27,9 +38,9 @@ class Product(Base):
     stock_minimum = Column(Integer, default=1, nullable=False)
     # Relationships
     specifications = relationship('Specification',
-        cascade='all, delete-orphan',
-        back_populates='product',
-    )
+                                  cascade='all, delete-orphan',
+                                  back_populates='product',
+                                  )
 
 
 class Specification(Base):
