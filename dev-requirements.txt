@@ -4,3 +4,4 @@ jedi
 autopep8
 ipdb
 pytest
+pytest-cov

@@ -27,11 +27,20 @@ def register_commands(app):
     @app.cli.command('t')
     @app.cli.command('tst')
     @app.cli.command('test')
-    @click.option('--pdb', is_flag=True)
-    def test(pdb):
+    @click.option('--pdb', is_flag=True, help='Enable pdb fallback')
+    @click.option('--cov', is_flag=True, help='Enable code coverage')
+    def test(pdb, cov):
         import pytest
-        args = ['--verbose', '-s']
+        args = []
         if pdb:
             args += ['--pdb']
+        if cov:
+            args += [
+                '--cov=app', 'tests/',
+                '--cov-config', '.coveragerc',
+                '--cov-report', 'term',
+            ]
+        else:
+            args += ['--verbose', '-s']
         rv = pytest.main(args)
         exit(rv)
