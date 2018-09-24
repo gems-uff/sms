@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, UniqueConstraint,
-                        ForeignKey, Date, Numeric, Boolean)
+                        ForeignKey, Date, Numeric, Boolean, CheckConstraint)
 from sqlalchemy.orm import relationship, backref
 from flask_sqlalchemy import Model
 
@@ -134,3 +134,26 @@ class OrderItem(Base):
     order = relationship('Order',
                          backref=backref('order_items',
                                          cascade='all, delete-orphan'))
+
+
+# TODO: refactor Transaction
+# TODO: Define cascade rules after refactoring
+class Transaction(Base, TimeStampedModelMixin):
+    __tablename__ = 'transactions'
+    # Columns
+    user_id = Column(Integer, ForeignKey(
+        'users.id', ondelete='SET NULL'), nullable=True)
+    product_id = Column(Integer, ForeignKey(
+        'products.id', ondelete='SET NULL'), nullable=True)
+    stock_id = Column(Integer, ForeignKey(
+        'stocks.id', ondelete='SET NULL'), nullable=True)
+    lot_number = Column(String(255), nullable=True)
+    amount = Column(Integer, nullable=False)
+    category = db.Column(Integer, nullable=False)
+    # Relationships
+    user = relationship('User')
+    product = relationship('Product')
+    stock = relationship('Stock')
+    # Constraints
+    __table_args__ = (
+        CheckConstraint(amount > 0, name='amount_is_positive'), {})
