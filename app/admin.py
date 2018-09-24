@@ -13,12 +13,14 @@ from flask_login import current_user
 
 from app.extensions import db
 from app.auth.models import User, Role, PreAllowedUser
-from app.main.models import Product, Specification, StockProduct, Stock
+from app.main.models import (
+    Product, Specification, StockProduct, Stock, Order, OrderItem)
 
 
 class ProtectedModelView(ModelView):
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.is_administrator()
+        return (current_user.is_authenticated and
+                current_user.is_administrator())
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('auth.login', next=request.url))
@@ -35,4 +37,6 @@ def register_admin(app):
         ProtectedModelView(Specification, db.session),
         ProtectedModelView(StockProduct, db.session),
         ProtectedModelView(Stock, db.session),
+        ProtectedModelView(Order, db.session),
+        ProtectedModelView(OrderItem, db.session),
     )

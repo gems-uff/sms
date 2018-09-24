@@ -1,15 +1,11 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, UniqueConstraint,
-                        ForeignKey, Date)
-from sqlalchemy.orm import relationship
+                        ForeignKey, Date, Numeric, Boolean)
+from sqlalchemy.orm import relationship, backref
 from flask_sqlalchemy import Model
 
 from app.extensions import db
-
-
-def ColumnFK(foreign_key: str, nullable=False):
-    return Column(Integer, ForeignKey(foreign_key), nullable=nullable)
 
 
 class Base(db.Model):
@@ -59,13 +55,12 @@ class Specification(Base):
             'product_id', 'manufacturer', 'catalog_number',
             name='unique_specification'),)
     # Columns
-    product_id = ColumnFK('products.id')
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
     manufacturer = Column(String(255), nullable=True)
     catalog_number = Column(String(255), nullable=True)
     units = Column(Integer, default=1, nullable=False)
     # Relationships
-    product = relationship('Product',
-                           back_populates='specifications')
+    product = relationship('Product', back_populates='specifications')
 
 
 class Stock(Base):
@@ -90,12 +85,52 @@ class StockProduct(Base):
         'stock_id', 'product_id', 'lot_number',
         name='unique_stock_product'),)
     # Columns
-    stock_id = ColumnFK('stocks.id')
-    product_id = ColumnFK('products.id')
+    stock_id = Column(Integer, ForeignKey('stocks.id'), nullable=False)
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
     lot_number = Column(String(255), nullable=False)
     expiration_date = Column(Date, nullable=True)
     amount = Column(Integer, default=0, nullable=False)
     # Relationships
-    stock = relationship('Stock',
-                         back_populates='stock_products')
-    product = relationship('Product')
+    stock = relationship('Stock', back_populates='stock_products')
+    product = relationship('Product',
+                           backref=backref('stock_products',
+                                           cascade='all, delete-orphan'))
+
+
+class Order(Base):
+    __tablename__ = 'orders'
+    # Columns
+    user_id = Column(Integer, ForeignKey(
+        'users.id', ondelete='SET NULL'), nullable=True)
+    invoice = Column(String(255), nullable=True)
+    invoice_type = Column(String(255), nullable=True)
+    invoice_value = Column(Numeric(12, 2), nullable=True)
+    financier = Column(String(255), nullable=True)
+    notes = Column(String(255), nullable=True)
+    order_date = Column(DateTime, default=datetime.utcnow, nullable=False)
+    # Relationships
+    user = relationship('User')
+
+
+# Rename to Item
+class OrderItem(Base):
+    __tablename__ = 'order_items'
+    __table_args__ = (UniqueConstraint(
+        'item_id', 'order_id', 'lot_number', name='unique_order_item'), )
+    # Columns
+    # TODO: rename it to specification_id
+    item_id = Column(Integer, ForeignKey(
+        'specifications.id', ondelete='SET NULL'), nullable=True)
+    order_id = Column(Integer, ForeignKey('orders.id'), nullable=False)
+    amount = Column(Integer, default=1, nullable=False)
+    lot_number = Column(String(255), nullable=False)
+    expiration_date = Column(
+        Date, default=datetime.utcnow().date, nullable=True)
+    # TODO: rename it to checked_out
+    added_to_stock = Column(Boolean, default=False, nullable=True)
+    # Relationships
+    # TODO: rename to specification
+    item = relationship('Specification')
+    order = relationship('Order',
+                         backref=backref('order_items',
+                                         cascade='all, delete-orphan'))
