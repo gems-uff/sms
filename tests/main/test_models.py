@@ -6,23 +6,25 @@ from app.main.models import Product, Specification, Stock, StockProduct
 
 
 class Test_Product():
-    def test_product_name_not_null(self, database):
+    def test_name_not_null(self, database):
         name = None
         p1 = Product(name=name)
         db.session.add(p1)
-        with pytest.raises(sqlexc.IntegrityError):
+        with pytest.raises(sqlexc.IntegrityError,
+                           match=r'.*not-null.*'):
             db.session.commit()
 
-    def test_product_name_uniqueness(self, database):
+    def test_name_unique(self, database):
         name = 'Product'
         p1 = Product(name=name)
         p2 = Product(name=name)
         db.session.add(p1)
         db.session.add(p2)
-        with pytest.raises(sqlexc.IntegrityError):
+        with pytest.raises(sqlexc.IntegrityError,
+                           match=r'.*products_name_key.*'):
             db.session.commit()
 
-    def test_product_stock_minimum_default_is_one(self, database):
+    def test_stock_minimum_defaults_to_one(self, database):
         name = 'Product'
         p1 = Product(name=name)
         db.session.add(p1)
@@ -32,25 +34,12 @@ class Test_Product():
 
 
 class Test_Specification():
-    def test_units_default_is_one(self, database):
+    def test_units_defaults_to_one(self, database):
         p1 = Product(name='Product').create()
         spec1 = Specification(product_id=p1.id).create()
         assert spec1.units is 1
 
-
-class Test_Product_Specification_Relationship():
-    def test_specification_is_deleted_if_orphan(self, database):
-        parent = Product(name='Product')
-        child_1 = Specification(product=parent)
-        parent.create()
-        assert child_1.product_id == parent.id
-        assert len(parent.specifications) is 1
-        assert parent.specifications[0] == child_1
-        parent.delete()
-        assert not Specification.query.all()
-        assert not Product.query.all()
-
-    def test_constraint_unique_specification(self, database):
+    def test_unique_specification_constraint(self, database):
         parent = Product(name='Product')
         child_1 = Specification(product=parent,
                                 manufacturer='Manufacturer',
@@ -61,7 +50,8 @@ class Test_Product_Specification_Relationship():
         child_2 = Specification(product=parent,
                                 manufacturer='Manufacturer',
                                 catalog_number='Catalog')
-        with pytest.raises(sqlexc.IntegrityError):
+        with pytest.raises(sqlexc.IntegrityError,
+                           match=r'.*unique_specification.*'):
             child_2.create()
         db.session.rollback()
         # Set another Product so it respects unique_specification
@@ -70,27 +60,100 @@ class Test_Product_Specification_Relationship():
         assert child_2.product_id is not None
 
 
+class Test_Product_Specification_Relationship():
+    def test_product_delete_cascades_to_specifications(self, database):
+        product = Product(name='Product')
+        child_1 = Specification(product=product)
+        child_2 = Specification(product=product)
+        product.create()
+        assert len(product.specifications) is 2
+        assert child_1.product_id is product.id
+        assert child_2.product_id is product.id
+        product.delete()
+        assert not Specification.query.all()
+        assert not Product.query.all()
+
+
 class Test_Stock():
-    def test_stock_name_not_null(self, database):
+    def test_name_not_null(self, database):
         name = None
         stock = Stock(name=name)
         db.session.add(stock)
-        with pytest.raises(sqlexc.IntegrityError):
+        with pytest.raises(sqlexc.IntegrityError,
+                           match=r'.*not-null.*'):
             db.session.commit()
 
-    def test_stock_name_unique(self, database):
+    def test_name_unique(self, database):
         name = 'Stock Name'
         stock_1 = Stock(name=name)
         stock_2 = Stock(name=name)
         db.session.add(stock_1)
         db.session.add(stock_2)
-        with pytest.raises(sqlexc.IntegrityError):
+        with pytest.raises(sqlexc.IntegrityError,
+                           match=r'.*stocks_name_key.*'):
             db.session.commit()
 
 
 class Test_StockProduct():
-    pass
+    def test_lot_number_not_null(self, database):
+        stock = Stock(name='Stock').create()
+        product = Product(name='Product').create()
+        lot_number = None
+        stock_product = StockProduct(stock_id=stock.id,
+                                     product_id=product.id,
+                                     lot_number=lot_number)
+        db.session.add(stock_product)
+        with pytest.raises(sqlexc.IntegrityError,
+                           match=r'.*not-null.*'):
+            db.session.commit()
+
+    def test_amount_default_to_zero(self, database):
+        stock = Stock(name='Stock').create()
+        product = Product(name='Product').create()
+        lot_number = 'Lot'
+        stock_product = StockProduct(stock_id=stock.id,
+                                     product_id=product.id,
+                                     lot_number=lot_number)
+        db.session.add(stock_product)
+        db.session.commit()
+        assert stock_product.amount is 0
+
+    def test_unique_stock_product_constraint(self, database):
+        stock = Stock(name='Stock').create()
+        product = Product(name='Product').create()
+        lot_number = 'Lot'
+        stock_product_1 = StockProduct(stock_id=stock.id,
+                                       product_id=product.id,
+                                       lot_number=lot_number)
+        stock_product_2 = StockProduct(stock_id=stock.id,
+                                       product_id=product.id,
+                                       lot_number=lot_number)
+        db.session.add(stock_product_1)
+        db.session.add(stock_product_2)
+        with pytest.raises(sqlexc.IntegrityError,
+                           match=r'.*unique_stock_product.*'):
+            db.session.commit()
+        db.session.rollback()
+        db.session.add(stock_product_1)
+        stock_product_2.lot_number = 'Lot_2'
+        db.session.add(stock_product_2)
+        db.session.commit()
 
 
 class Test_Stock_StockProduct_Relationship():
-    pass
+    def test_stock_delete_cascades_to_stock_products(self, database):
+        stock = Stock(name='Stock')
+        product = Product(name='Product')
+        stock_product_1 = StockProduct(stock=stock,
+                                       product=product,
+                                       lot_number='Lot 1')
+        stock_product_2 = StockProduct(stock=stock,
+                                       product=product,
+                                       lot_number='Lot 2')
+        stock.create()
+        assert len(stock.stock_products) is 2
+        assert stock_product_1.stock_id is stock.id
+        assert stock_product_2.stock_id is stock.id
+        stock.delete()
+        assert not StockProduct.query.all()
+        assert not Stock.query.all()

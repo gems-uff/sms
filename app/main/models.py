@@ -65,8 +65,7 @@ class Specification(Base):
     units = Column(Integer, default=1, nullable=False)
     # Relationships
     product = relationship('Product',
-                           back_populates='specifications',
-                           single_parent=True)
+                           back_populates='specifications')
 
 
 class Stock(Base):
@@ -92,6 +91,5 @@ class StockProduct(Base):
     amount = Column(Integer, default=0, nullable=False)
     # Relationships
     stock = relationship('Stock',
-                         back_populates='stock_products',
-                         single_parent=True)
-    product = relationship('Product', single_parent=True)
+                         back_populates='stock_products')
+    product = relationship('Product')
