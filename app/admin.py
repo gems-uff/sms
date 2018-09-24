@@ -14,7 +14,7 @@ from flask_login import current_user
 from app.extensions import db
 from app.auth.models import User, Role, PreAllowedUser
 from app.main.models import (
-    Product, Specification, StockProduct, Stock, Order, OrderItem)
+    Product, Specification, StockProduct, Stock, Order, OrderItem, Transaction)
 
 
 class ProtectedModelView(ModelView):
@@ -39,4 +39,5 @@ def register_admin(app):
         ProtectedModelView(Stock, db.session),
         ProtectedModelView(Order, db.session),
         ProtectedModelView(OrderItem, db.session),
+        ProtectedModelView(Transaction, db.session),
     )

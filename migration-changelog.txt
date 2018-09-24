@@ -1,0 +1,8 @@
+====== Executed on 24/09/2018 =========
+# Product merging (to avoid conflict with unique name attribute)
+Associate all `specifications`, `stock_products` and `transactions` to one unit, save it. The others will be blank now, simply delete them.
+- 100 bp DNA Ladder (3 products merged into 1, critical)
+- Pyromark Annealing Buffer (2 products merged into 1)
+- Pyromark Binding Buffer (2 products merged into 1)
+- Streptavidin Sepharose High Performance (2 products merged into 1, no transactions)
+=======================================
