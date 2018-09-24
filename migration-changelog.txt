@@ -5,4 +5,6 @@ Associate all `specifications`, `stock_products` and `transactions` to one unit,
 - Pyromark Annealing Buffer (2 products merged into 1)
 - Pyromark Binding Buffer (2 products merged into 1)
 - Streptavidin Sepharose High Performance (2 products merged into 1, no transactions)
+	- 2 identycal specs: id=24 and id=120. Deleted id=24
+
 =======================================
