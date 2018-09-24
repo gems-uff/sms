@@ -2,7 +2,21 @@ import pytest
 import sqlalchemy.exc as sqlexc
 
 from app.extensions import db
-from app.main.models import Product, Specification, Stock, StockProduct
+from app.main.models import Base, Product, Specification, Stock, StockProduct
+
+
+class TestBase():
+    def test_repr(self, database):
+        class ReprModel(Base):
+            pass
+        x = ReprModel(id=1)
+        assert repr(x) == '<ReprModel (1)>'
+
+    def test_str(self, database):
+        class StrModel(Base):
+            pass
+        x = StrModel(id=1)
+        assert str(x) == '<StrModel (1)>'
 
 
 class Test_Product():
@@ -92,6 +106,12 @@ class Test_Stock():
         with pytest.raises(sqlexc.IntegrityError,
                            match=r'.*stocks_name_key.*'):
             db.session.commit()
+
+    def test_insert_main_stock(self, database):
+        Stock.insert_main_stock()
+        assert len(Stock.query.all()) is 1
+        Stock.insert_main_stock()
+        assert len(Stock.query.all()) is 1
 
 
 class Test_StockProduct():

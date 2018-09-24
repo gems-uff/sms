@@ -1,8 +1,10 @@
-[tool:pytest]
-testpaths = tests
-
-[coverage:run]
+[run]
 omit = tests/*
 branch = True
-source =
-    app
+
+[paths]
+source = 
+    app/
+
+[report]
+show_missing = True
