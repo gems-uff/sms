@@ -79,7 +79,7 @@ class Stock(Base):
 
     @staticmethod
     def insert_main_stock():
-        stock = Stock.query.filter_by(name='main').first()
+        stock = Stock.query.first()
         if not stock:
             stock = Stock(name='main').create()
 
@@ -172,7 +172,7 @@ class Order(Base):
 
 
 # Rename to Item
-class OrderItem(Base):
+class OrderItem(Base, TimeStampedModelMixin):
     __tablename__ = 'order_items'
     __table_args__ = (UniqueConstraint(
         'item_id', 'order_id', 'lot_number', name='unique_order_item'), )
