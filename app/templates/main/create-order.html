@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "utils/_forms_rendering.html" as frender %}
+
+{% block page_content %}
+  {% include "main/_navigation.html" %}
+  <div class="page-header">
+      <h1>Comprar Reativo</h1>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <form class="form" method="post">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+        {{ wtf.form_field(form.item_id) }}
+        {{ wtf.form_field(form.amount) }}
+        {{ wtf.form_field(form.lot_number) }}
+        {{ wtf.form_field(form.expiration_date) }}
+        {{ wtf.form_field(form.add_product) }}
+        {% if order_items %}
+          {{ wtf.form_field(form.finish_order) }}
+          {{ wtf.form_field(form.cancel) }}
+        {% endif %}
+      </form>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+    <div class="col-md-12">
+      {% include "main/_cart.html" %}
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.getElementById("amount").required = false;
+  document.getElementById("lot_number").required = false;
+  document.getElementById("expiration_date").required = false;
+  document.getElementById("finish_order").className += " btn-success";
+  document.getElementById("cancel").className += " btn-danger";
+</script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+<script type="text/javascript">
+$('#item_id').select2({
+    "language": {
+        "noResults": function() {
+            return "Reativo não encontrado. <a href='{{ url_for('main.add_product_to_catalog') }}'>Cadastrar no Catálogo?</a>"
+        }
+    },
+    escapeMarkup: function (markup) {
+        return markup;
+    }
+});
+
+$(document).ready(function() {
+    $('form').submit(function() {
+        var val = $("input[type=submit][clicked=true]").val();
+        // DO WORK
+        if (val === 'Limpar o carrinho') {
+            var c = confirm("Tem certeza que deseja excluir todos itens do carrinho?");
+            return c;
+        };
+    });
+    $("form input[type=submit]").click(function() {
+        $("input[type=submit]", $(this).parents("form")).removeAttr("clicked");
+        $(this).attr("clicked", "true");
+    });
+});
+</script>
+{% endblock %}

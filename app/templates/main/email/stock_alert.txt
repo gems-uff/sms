@@ -1,0 +1,3 @@
+Prezado Usuário,
+O reativo {{ reactive_name }} está com estoque = {{ amount_in_stock }}. (Valor mínimo = {{ min_stock }})
+Por favor, não responda esse email.

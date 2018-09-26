@@ -283,13 +283,14 @@ class Test_OrderItem_Specification_Relationship():
         assert order_item.item is None
 
 
+@pytest.mark.skip
 class Test_Transaction_Relationships():
-    # TODO: tests for transaction
-    def test_user():
+    # TODO: tests for transaction after refactoring it
+    def test_user(self, database):
         pass
 
-    def test_product():
+    def test_product(self, database):
         pass
 
-    def test_stock():
+    def test_stock(self, database):
         pass

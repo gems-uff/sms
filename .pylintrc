@@ -7,11 +7,14 @@ extension-pkg-whitelist=
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=CVS
+ignore=CVS,
+       tests,
+       migrations
 
 # Add files or directories matching the regex patterns to the blacklist. The
 # regex matches against base names, not paths.
-ignore-patterns=
+ignore-patterns=tests/**/*.py
+                migrations/**/*
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
@@ -140,8 +143,8 @@ disable=print-statement,
         deprecated-sys-function,
         exception-escape,
         comprehension-escape,
-        C0111,
-        C0103
+        C0111, # No docstring
+        C0103  # No naming convention
 
 
 # Enable the message, report, category or checker with the given id(s). You can

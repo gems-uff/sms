@@ -4,6 +4,9 @@ import os
 from logging.handlers import SMTPHandler, RotatingFileHandler
 
 
+logger = logging
+
+
 def register_logger(app):
     # Production configuration
     if not app.debug and not app.testing:

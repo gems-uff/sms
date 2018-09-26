@@ -1,3 +1,4 @@
+import jsonpickle
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, UniqueConstraint,
@@ -21,6 +22,9 @@ class Base(db.Model):
         db.session.delete(self)
         db.session.commit()
         return self
+
+    def toJSON(self):
+        return jsonpickle.encode(self)
 
     def __repr__(self):
         return f'<{self.__class__.__name__} ({self.id})>'
@@ -77,6 +81,60 @@ class Stock(Base):
         stock = Stock.query.filter_by(name='main').first()
         if not stock:
             stock = Stock(name='main').create()
+
+    def total(self, product):
+        total = 0
+        for sp in self.stock_products:
+            if sp.product_id == product.id:
+                total += sp.amount
+        return total
+
+    def get_in_stock(self, product, lot_number):
+        for stock_product in self.stock_products:
+            if stock_product.product == product \
+                    and stock_product.lot_number == lot_number:
+                return stock_product
+        return None
+
+    def has_enough(self, product, lot_number, amount):
+        if amount < 1:
+            raise ValueError('Amount must be greater than 0')
+        in_stock = self.get_in_stock(product, lot_number)
+        if in_stock is None or in_stock.amount < amount:
+            return False
+        return True
+
+    def add(self, product, lot_number, expiration_date, amount):
+        if amount < 1 or isinstance(amount, int) is False:
+            raise ValueError('Amount must be a positive integer')
+        stock_product = self.get_in_stock(product, lot_number)
+        if stock_product is None:
+            stock_product = StockProduct(
+                stock=self,
+                product=product,
+                lot_number=lot_number,
+                expiration_date=expiration_date,
+                amount=0    )
+        else:
+            if expiration_date != stock_product.expiration_date:
+                logging.warning('Different expiration date, updating...')
+        stock_product.expiration_date = expiration_date
+        stock_product.amount += amount
+        db.session.add(stock_product)
+
+    def subtract(self, product, lot_number, amount):
+        """
+        amount: total units to be subtracted
+        """
+        if amount < 1 or isinstance(amount, int) is False:
+            raise ValueError('Amount must be a positive integer')
+        in_stock = self.get_in_stock(product, lot_number)
+        if in_stock is None:
+            raise ValueError('There is no {} in stock'.format(product.name))
+        if self.has_enough(product, lot_number, amount):
+            in_stock.amount -= amount
+            return True
+        raise ValueError('Not enough in stock')
 
 
 class StockProduct(Base):
@@ -137,6 +195,9 @@ class OrderItem(Base):
 
 
 # TODO: refactor Transaction
+# - Add OrderItem dependency (1 to 1, uselist=False)
+# - Add StockProduct dependency (many to one)
+# - Split in two different Transactions?
 # TODO: Define cascade rules after refactoring
 class Transaction(Base, TimeStampedModelMixin):
     __tablename__ = 'transactions'
@@ -149,7 +210,7 @@ class Transaction(Base, TimeStampedModelMixin):
         'stocks.id', ondelete='SET NULL'), nullable=True)
     lot_number = Column(String(255), nullable=True)
     amount = Column(Integer, nullable=False)
-    category = db.Column(Integer, nullable=False)
+    category = Column(Integer, nullable=False)
     # Relationships
     user = relationship('User')
     product = relationship('Product')
@@ -157,3 +218,6 @@ class Transaction(Base, TimeStampedModelMixin):
     # Constraints
     __table_args__ = (
         CheckConstraint(amount > 0, name='amount_is_positive'), {})
+    # Attributes
+    ADD = 1
+    SUB = 2

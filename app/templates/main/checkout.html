@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block page_content %}
+  {% include "main/_navigation.html" %}
+  <div class="page-header">
+    <h1>Checkout</h1>
+  </div>
+  {% include "main/_cart.html" %}
+  {{ wtf.quick_form(form) }}
+  <br />
+  <div class="btn btn-default">
+      <a href="{{ url_for('main.purchase_product') }}">Voltar</a>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  document.getElementById("submit").className += " btn-success";
+  document.getElementById("cancel").className += " btn-danger";
+
+  $(document).ready(function() {
+     $('form').submit(function() {
+         var val = $("input[type=submit][clicked=true]").val();
+         // DO WORK
+         if (val === 'Limpar o carrinho') {
+             var c = confirm("Tem certeza que deseja excluir todos itens do carrinho?");
+             return c;
+         };
+     });
+     $("form input[type=submit]").click(function() {
+         $("input[type=submit]", $(this).parents("form")).removeAttr("clicked");
+         $(this).attr("clicked", "true");
+     });
+ });
+</script>
+{% endblock %}
