@@ -1,3 +1,3 @@
 web: gunicorn run:app
-release: flask deploy
+release: flask db upgrade
 
