@@ -7,14 +7,14 @@ import sqlalchemy
 from flask_login import current_user
 
 from app.extensions import db
+from app.logger import logger
 from app.auth.decorators import restrict_to_logged_users, permission_required
 from app.auth.models import Permission
-# TODO: move to service
 from .models import (
     Order, OrderItem, Transaction, Stock, StockProduct, Product, Specification)
 from . import forms
 from . import services as svc
-from app.logger import logger
+from . import utils
 
 
 blueprint = Blueprint('main', __name__)
