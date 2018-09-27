@@ -156,7 +156,7 @@ class StockProduct(Base):
                                            cascade='all, delete-orphan'))
 
 
-class Order(Base):
+class Order(Base, TimeStampedModelMixin):
     __tablename__ = 'orders'
     # Columns
     user_id = Column(Integer, ForeignKey(
@@ -172,10 +172,12 @@ class Order(Base):
 
 
 # Rename to Item
-class OrderItem(Base, TimeStampedModelMixin):
+class OrderItem(Base):
     __tablename__ = 'order_items'
-    __table_args__ = (UniqueConstraint(
-        'item_id', 'order_id', 'lot_number', name='unique_order_item'), )
+    # The following unique constraint was removed since it didn't bring
+    # any advantages
+    # __table_args__ = (UniqueConstraint(
+    #     'item_id', 'order_id', 'lot_number', name='unique_order_item'), )
     # Columns
     # TODO: rename it to specification_id
     item_id = Column(Integer, ForeignKey(
@@ -185,7 +187,7 @@ class OrderItem(Base, TimeStampedModelMixin):
     lot_number = Column(String(255), nullable=False)
     expiration_date = Column(
         Date, default=datetime.utcnow().date, nullable=True)
-    # TODO: delete it (unused)
+    # TODO: delete it
     added_to_stock = Column(Boolean, default=False, nullable=True)
     # Relationships
     # TODO: rename to specification

@@ -1,3 +1,6 @@
+import jsonpickle
+from flask import session
+
 from app.extensions import db
 from app.main.models import (Stock, StockProduct, Product,
                              Order, OrderItem, Specification, Transaction)
@@ -51,3 +54,26 @@ def create_sub_transaction(user, product, lot_number, amount, stock):
 
     db.session.add(transaction)
     db.session.commit()
+
+
+def get_order_items_from_session():
+    if not session.get('order_items'):
+        session['order_items'] = []
+        return []
+    else:
+        return [jsonpickle.decode(item) for item in session.get('order_items')]
+
+
+def add_order_item_to_session(order_item):
+    # See http://flask.pocoo.org/docs/0.12/api/#sessions
+    # Must be manually set
+    if not session.get('order_items'):
+        session['order_items'] = []
+    session['order_items'] += [order_item.toJSON()]
+    session.modified = True
+
+
+def clear_order_items_session():
+    if not session.get('order_items'):
+        session['order_items'] = []
+    session['order_items'] = []
