@@ -272,7 +272,7 @@ def add_product_to_catalog():
             flash('Já existe um reativo com esse nome no catálogo.\
                 Segue abaixo suas especificações', 'warning')
         else:
-            svc.create_product(form.name.data)
+            product = svc.create_product(form.name.data)
             flash(f'{product.name} adicionado ao catálogo com sucesso',
                   'success')
         return redirect(url_for('.detail_product',

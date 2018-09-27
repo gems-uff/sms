@@ -64,7 +64,7 @@ class OrderForm(FlaskForm):
         validators=[Optional()])
     invoice = wtf.StringField('Nota', validators=[Optional()])
     invoice_value = wtf.FloatField(
-        'Valor total (separar por PONTO)',
+        'Valor total',
         render_kw={'placeholder': 'R$ 123.40'},
         validators=[Optional()],
         widget=widgets.NumberInput(step='0.01', min='0.00', max='9999999999.99'))

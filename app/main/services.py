@@ -60,3 +60,4 @@ def create_product(name):
     product = Product(name=name)
     db.session.add(product)
     db.session.commit()
+    return product
