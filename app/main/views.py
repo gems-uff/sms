@@ -267,31 +267,14 @@ def add_product_to_catalog():
     form = forms.AddProductForm()
 
     if form.validate_on_submit():
-        try:
-            specification = Specification(
-                form.catalog_number.data,
-                form.manufacturer.data,
-                form.units.data,
-            )
-            product = Product(
-                name=form.name.data,
-                stock_minimum=form.stock_minimum.data,
-                specification=specification,
-            )
-            db.session.add(product)
-            db.session.add(specification)
-            db.session.commit()
-        except sqlalchemy.exc.IntegrityError:
-            db.session.rollback()
-            flash('Já existe uma especificação com esse catálogo e fabricante',
-                  'danger')
-            return render_template('main/create-product.html', form=form)
-        except Exception as exc:
-            db.session.rollback()
-            logger.info(exc)
-            flash('Ocorreu um erro inesperado, contate um admministrador.',
-                  'danger')
-            return render_template('main/create-product.html', form=form)
+        product = svc.get_product_by_name(form.name.data)
+        if product:
+            flash('Já existe um reativo com esse nome no catálogo.\
+                Segue abaixo suas especificações', 'warning')
+        else:
+            svc.create_product(form.name.data)
+            flash(f'{product.name} adicionado ao catálogo com sucesso',
+                  'success')
         return redirect(url_for('.detail_product',
                                 product_id=product.id,
                                 specifications=product.specifications))
@@ -304,7 +287,6 @@ def add_product_to_catalog():
 def add_specification_to_product(product_id):
     product = Product.query.get_or_404(product_id)
     form = forms.AddSpecificationForm(product.id)
-
     if form.validate_on_submit():
         try:
             specification = Specification(

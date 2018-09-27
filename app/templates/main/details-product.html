@@ -9,6 +9,8 @@
   <a href="{{ url_for('main.add_specification_to_product', product_id=product.id) }}" class="btn btn-default">Adicionar Especificação</a>
   <div class="product-details">
     <h2>{{ product.name }}</h2>
+    <p>Alerta de estoque em: {{ product.stock_minimum }}</p>
+    <p>Total de especificações: {{ specifications | length }}</p>
     <hr />
     {% for spec in specifications %}
     <div class="specification-details">

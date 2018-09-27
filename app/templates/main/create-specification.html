@@ -9,7 +9,5 @@
   <h3>Reativo: {{ product.name }}</h3>
   <hr />
   {{ wtf.quick_form(form) }}
-  <div class="btn">
-    <a href="{{ url_for('main.detail_product', product_id=product.id) }}" class="btn btn-danger">Voltar</a>
-  </div>
+
 {% endblock %}

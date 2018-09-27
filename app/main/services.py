@@ -51,3 +51,12 @@ def create_sub_transaction(user, product, lot_number, amount, stock):
 
     db.session.add(transaction)
     db.session.commit()
+
+
+def get_product_by_name(name):
+    return Product.query.filter_by(name=name).first()
+
+def create_product(name):
+    product = Product(name=name)
+    db.session.add(product)
+    db.session.commit()
