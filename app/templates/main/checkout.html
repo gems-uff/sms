@@ -22,7 +22,7 @@
 
   $(document).ready(function() {
      $('form').submit(function() {
-         var val = $("input[type=submit][clicked=true]").val();
+         var val = $('units').val();
          // DO WORK
          if (val === 'Limpar o carrinho') {
              var c = confirm("Tem certeza que deseja excluir todos itens do carrinho?");

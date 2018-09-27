@@ -13,6 +13,10 @@
   Especificação</a>
 <hr />
 <h2>Especificações</h2>
+{% if not specifications %}
+<h3>Nenhuma especificação encontrada.</h3>
+<p>É necessário adicionar pelo menos 1 especificação.</p>
+{% else %}
 <table class="table table-bordered">
   <thead>
     <th>Fabricante</th>
@@ -29,4 +33,5 @@
     {% endfor %}
   </tbody>
 </table>
+{% endif %}
 {% endblock %}
