@@ -2,23 +2,31 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block page_content %}
-  {% include "main/_navigation.html" %}
-  <div class="page-header">
-    <h1>Detalhes do Reativo</h1>
-  </div>
-  <a href="{{ url_for('main.add_specification_to_product', product_id=product.id) }}" class="btn btn-default">Adicionar Especificação</a>
-  <div class="product-details">
-    <h2>{{ product.name }}</h2>
-    <p>Alerta de estoque em: {{ product.stock_minimum }}</p>
-    <p>Total de especificações: {{ specifications | length }}</p>
-    <hr />
+{% include "main/_navigation.html" %}
+<div class="page-header">
+  <h1>Detalhes do Reativo</h1>
+</div>
+<h2>Nome: {{ product.name }}</h2>
+<p>Alerta de estoque em: {{ product.stock_minimum }}</p>
+<p>Total de especificações: {{ specifications | length }}</p>
+<a href="{{ url_for('main.add_specification_to_product', product_id=product.id) }}" class="btn btn-default btn-success">Adicionar
+  Especificação</a>
+<hr />
+<h2>Especificações</h2>
+<table class="table table-bordered">
+  <thead>
+    <th>Fabricante</th>
+    <th>Catálogo</th>
+    <th style="width: 20%">Unidades de Estoque</th>
+  </thead>
+  <tbody>
     {% for spec in specifications %}
-    <div class="specification-details">
-      <p>Fabricante: {{ spec.manufacturer }}</p>
-      <p>Catálogo: {{ spec.catalog_number }}</p>
-      <p>Unidades de estoque: {{ spec.units }}</p>
-      <hr />
-    </div>
+    <tr>
+      <td>{{ spec.manufacturer }}</td>
+      <td>{{ spec.catalog_number }}</td>
+      <td>{{ spec.units }}</td>
+    </tr>
     {% endfor %}
-  </div>
+  </tbody>
+</table>
 {% endblock %}

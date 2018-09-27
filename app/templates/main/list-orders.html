@@ -9,7 +9,7 @@
       Ordens Executadas
     </h1>
 </div>
-<table class="table table-striped table-bordered">
+<table class="table table-bordered">
   <thead>
     <tr>
       <th width="15%">Data</th>
@@ -26,11 +26,11 @@
       <tr>
         <td>{{ moment(order.order_date).format('DD/MM/YYYY [-] HH:mm') }}</td>
         <td>{{ order.user.email }}</td>
-        <td>{{ order.invoice }}</td>
+        <td>{{ order.invoice|default('-', true) }}</td>
         <td>{{ order.invoice_type }}</td>
-        <td>{{ order.invoice_value }}</td>
-        <td>{{ order.financier }}</td>
-        <td>{{ order.notes }}</td>
+        <td>{{ order.invoice_value|default('-', true) }}</td>
+        <td>{{ order.financier|default('-', true) }}</td>
+        <td>{{ order.notes|default('-', true)}}</td>
       </tr>
     {% endfor %}
   </tbody>
