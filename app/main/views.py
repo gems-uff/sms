@@ -85,53 +85,26 @@ def purchase_product():
     }
     form = forms.OrderItemForm(**form_context)
 
-    if session.get('order_items') is None:
-        session['order_items'] = []
-    order_items = [jsonpickle.decode(item)
-                   for item in session.get('order_items')]
+    order_items = svc.get_order_items_from_session()
     for order_item in order_items:
         order_item.item = Specification.query.get(order_item.item_id)
 
     if request.method == 'POST':
-        logger.info('POSTing to purchase_product')
         if form.cancel.data is True:
-            logger.info('Cancel order, cleaning session')
-            session['order_items'] = []
+            clear_order_items_session()
             return redirect(url_for('.purchase_product'))
         if form.finish_order.data is True:
-            logger.info(
-                'checking if there is at least 1 o_item in session')
-            if session.get('order_items'):
-                logger.info(
-                    'Finishing order => redirect to checkout()')
+            if order_items:
                 return redirect(url_for('.checkout'))
-            logger.info('None order item added to session')
             flash('Pelo menos 1 reativo deve ser adicionado ao carrinho.',
                   'danger')
             return redirect(url_for('.purchase_product'))
         if form.validate():
-            logger.info('Create order form is valid')
             order_item = OrderItem()
             form.populate_obj(order_item)
-            logger.info('order_item obj was populated')
-            if not session.get('order_items'):
-                logger.info(
-                    'order_items not found in session => create [oi]')
-                session['order_items'] = [order_item.toJSON()]
-            else:
-                logger.info(
-                    'order_items found in session => append(oi)')
-                session['order_items'].append(order_item.toJSON())
-                # See http://flask.pocoo.org/docs/0.12/api/#sessions
-                # Must be manually set
-                session.modified = True
-
-            logger.info('finishing form.validate')
+            svc.add_order_item_to_session(order_item)
             flash('Reativo adicionado ao carrinho', 'success')
             return redirect(url_for('.purchase_product'))
-        logger.info(
-            'redirecting to route with or w/out errors and form')
-    logger.info('GETting purchase_product')
     return render_template('main/create-order.html',
                            form=form, order_items=order_items)
 

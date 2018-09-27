@@ -246,7 +246,7 @@ class Test_Order_User_Relationship():
 
 
 class Test_OrderItem():
-    def test_unique_order_item_constraint(self, database):
+    def test_non_unique_order_item_constraint(self, database):
         order = Order()
         product = Product(name='Product')
         specification = Specification(product=product)
@@ -256,16 +256,9 @@ class Test_OrderItem():
             item=specification, order=order, lot_number='lot_1')
         db.session.add(order_item_1)
         db.session.add(order_item_2)
-        with pytest.raises(sqlexc.IntegrityError,
-                           match=r'.*unique_order_item.*'):
-            db.session.commit()
-        db.session.rollback()
-        order_item_2.lot_number = 'lot_2'
-        db.session.add(order_item_1)
-        db.session.add(order_item_2)
         db.session.commit()
         assert order_item_1.lot_number == 'lot_1'
-        assert order_item_2.lot_number == 'lot_2'
+        assert order_item_2.lot_number == 'lot_1'
 
 
 class Test_OrderItem_Specification_Relationship():
