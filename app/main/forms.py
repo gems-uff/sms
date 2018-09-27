@@ -63,7 +63,7 @@ class OrderForm(FlaskForm):
         validators=[Optional()])
     invoice = wtf.StringField('Nota', validators=[Optional()])
     invoice_value = wtf.FloatField(
-        'Valor total (separar por PONTO)',
+        'Valor total',
         render_kw={'placeholder': 'R$ 123.40'},
         validators=[Optional()],
         widget=widgets.NumberInput(step='0.01', min='0.00', max='9999999999.99'))
@@ -104,20 +104,6 @@ class ConsumeProductForm(FlaskForm):
 
 class AddProductForm(FlaskForm):
     name = wtf.StringField('Nome do reativo', validators=[InputRequired()])
-    catalog_number = wtf.StringField(
-        'Número de catálogo', validators=[InputRequired()])
-    manufacturer = wtf.StringField('Fabricante', validators=[InputRequired()])
-    units = wtf.IntegerField('<a href="#" data-toggle="tooltip" title="Quantidade de unidades que essa apresentação possui. Representa a quantidade física dessa apresentação que será adicionada ao estoque quando comprado.">Unidades de estoque</a>',
-                             default=1,
-                             validators=[
-                                 InputRequired(),
-                                 NumberRange(min=1, max=None,
-                                             message='Deve ser maior que zero!')
-                             ],
-                             widget=widgets.NumberInput(),
-                             render_kw={'autocomplete': 'off'},
-
-                             )
     stock_minimum = wtf.IntegerField(
         'Alertar quando estoque atingir',
         default=1,
@@ -129,14 +115,6 @@ class AddProductForm(FlaskForm):
         render_kw={'autocomplete': 'off'},
     )
     submit = wtf.SubmitField('Cadastrar Reativo')
-
-    def validate_spec_catalog(self, field):
-        spec = models.Specification.query.filter_by(
-            catalog_number=field.data,
-            manufacturer=self.manufacturer.data).first()
-        if spec is not None:
-            raise wtf.ValidationError(
-                'Essa especificação já está cadastrada (catálogo e fabricante')
 
 
 class AddSpecificationForm(FlaskForm):
