@@ -86,8 +86,6 @@ def purchase_product():
     form = forms.OrderItemForm(**form_context)
 
     order_items = svc.get_order_items_from_session()
-    for order_item in order_items:
-        order_item.item = Specification.query.get(order_item.item_id)
 
     if request.method == 'POST':
         if form.cancel.data is True:
@@ -114,66 +112,44 @@ def purchase_product():
 def checkout():
     form = forms.OrderForm()
     stock = svc.get_stock()
-    if session.get('order_items') is None:
-        session['order_items'] = []
-    order_items = [jsonpickle.decode(item)
-                   for item in session.get('order_items')]
-    for order_item in order_items:
-        order_item.item = Specification.query.get(order_item.item_id)
-    logger.info('Retrieve unpickled order_items from session')
+    order_items = svc.get_order_items_from_session()
     if request.method == 'POST':
-        logger.info('POSTing to checkout')
         if form.cancel.data is True:
-            logger.info('Cancel order, cleaning session')
-            session['order_items'] = []
+            svc.clear_order_items_session()
             return redirect(url_for('.purchase_product'))
         if order_items:
             if form.validate():
-                logger.info('starting check out...')
                 order = Order()
-                logger.info(
-                    'populating order with form data and order_items')
                 form.populate_obj(order)
                 order.order_items = order_items
                 order.user = current_user
                 db.session.add(order)
                 try:
-                    logger.info('Saving order to database...')
                     for order_item in order.order_items:
-                        logger.info(
-                            'Adding %s to stock' % order_item)
                         product = order_item.item.product
                         lot_number = order_item.lot_number
                         total_units = order_item.amount * order_item.item.units
                         expiration_date = order_item.expiration_date
-                        logger.info('stock.add({}, {}, {}, {})'.format(
-                            product, lot_number, expiration_date, total_units))
                         stock.add(
                             product,
                             lot_number,
                             expiration_date,
                             total_units)
                         order_item.added_to_stock = True
-                        db.session.add(order_item)
-                    logger.info('Comitting session...')
                     db.session.commit()
-                    logger.info(
-                        'Creating transactions from order...')
                     svc.create_add_transactions_from_order(order, stock)
-                    logger.info(
-                        'Flashing success and returning to index')
                     flash('Ordem executada com sucesso', 'success')
-                    session['order_items'] = []
+                    svc.clear_order_items_session()
                     return redirect(url_for('.index'))
-                except (ValueError) as err:
+                except ValueError as err:
                     db.session.rollback()
-                    session['order_items'] = []
+                    svc.clear_order_items_session()
                     logger.error('Could not save the order to db. Rollback.')
                     logger.error(err)
-                    flash('Algo deu errado, contate um administrador!')
-                    return render_template('main/index.html')
+                    flash('Algo deu errado, contate um administrador!',
+                          'danger')
+                    return redirect(url_for('main.index'))
         else:
-            logger.info('No item added to cart')
             flash('É necessário adicionar pelo menos 1 item ao carrinho.',
                   'warning')
             return redirect(url_for('.purchase_product'))
@@ -278,6 +254,20 @@ def add_specification_to_product(product_id):
                   'danger')
     return render_template('main/create-specification.html',
                            form=form, product=product)
+
+
+# @blueprint.route('/specifications/<int:specification_id>/delete',
+#                  methods=['GET'])
+# @permission_required(Permission.DELETE)
+# def delete_specification(specification_id):
+#     try:
+#         svc.delete_specification(specification_id)
+#         flash('Especificação deletada com sucesso', 'success')
+#     except Exception as exc:
+#         logger.error(exc, f'Error deleting specification: {specification_id}')
+#         flash(('''Não foi possível excluir essa especificação.
+#         Contate um adminstrador.'''), 'danger')
+#     return redirect(request.referrer)
 
 
 @blueprint.route('/products/<int:product_id>', methods=['GET'])

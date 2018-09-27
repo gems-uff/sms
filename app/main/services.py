@@ -26,6 +26,7 @@ def get_specifications():
     return db.session.query(Specification).join(Product).order_by(
         Product.name).all()
 
+
 def create_add_transactions_from_order(order, stock):
     user = order.user
     for order_item in order.order_items:
@@ -70,9 +71,16 @@ def create_product(name):
 def get_order_items_from_session():
     if not session.get('order_items'):
         session['order_items'] = []
+        session.modified = True
         return []
     else:
-        return [jsonpickle.decode(item) for item in session.get('order_items')]
+        order_items = [
+            jsonpickle.decode(item) for item in session.get('order_items')]
+
+        for order_item in order_items:
+            order_item.item = Specification.query.get(order_item.item_id)
+
+        return [order_item for order_item in order_items if order_item.item]
 
 
 def add_order_item_to_session(order_item):
@@ -85,6 +93,20 @@ def add_order_item_to_session(order_item):
 
 
 def clear_order_items_session():
-    if not session.get('order_items'):
-        session['order_items'] = []
     session['order_items'] = []
+    session.modifired = True
+
+
+# TODO: this is kinda dangerous because of the session.
+# It's probably better to first remove the OrderItem => Specification dep
+# def delete_specification(specification_id):
+#     # TODO: is this the best place to clear the session?
+#     clear_order_items_session()
+#     specification = Specification.query.get_or_404(specification_id)
+#     if specification:
+#         import ipdb; ipdb.set_trace();
+#         children_order_items = db.session.query(
+#             Specification).filter_by(id=specification_id).join(OrderItem).all()
+#         for order_item in children_order_items:
+#             order_item.delete()
+#         specification.delete()
