@@ -4,8 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms.validators import (DataRequired, InputRequired, NumberRange,
                                 Optional)
 
-import app.main.models as models
-from app.main.models import Product, StockProduct, Transaction
+from .models import Product, StockProduct, Transaction, Specification
 
 
 class OrderItemForm(FlaskForm):

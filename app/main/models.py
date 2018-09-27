@@ -7,6 +7,7 @@ from sqlalchemy.orm import relationship, backref
 from flask_sqlalchemy import Model
 
 from app.extensions import db
+from app.logger import logger
 
 
 class Base(db.Model):
@@ -78,7 +79,7 @@ class Stock(Base):
 
     @staticmethod
     def insert_main_stock():
-        stock = Stock.query.filter_by(name='main').first()
+        stock = Stock.query.first()
         if not stock:
             stock = Stock(name='main').create()
 
@@ -117,7 +118,7 @@ class Stock(Base):
                 amount=0    )
         else:
             if expiration_date != stock_product.expiration_date:
-                logging.warning('Different expiration date, updating...')
+                logger.warning('Different expiration date, updating...')
         stock_product.expiration_date = expiration_date
         stock_product.amount += amount
         db.session.add(stock_product)
@@ -171,7 +172,7 @@ class Order(Base):
 
 
 # Rename to Item
-class OrderItem(Base):
+class OrderItem(Base, TimeStampedModelMixin):
     __tablename__ = 'order_items'
     __table_args__ = (UniqueConstraint(
         'item_id', 'order_id', 'lot_number', name='unique_order_item'), )
