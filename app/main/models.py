@@ -156,7 +156,7 @@ class StockProduct(Base):
                                            cascade='all, delete-orphan'))
 
 
-class Order(Base):
+class Order(Base, TimeStampedModelMixin):
     __tablename__ = 'orders'
     # Columns
     user_id = Column(Integer, ForeignKey(
@@ -172,7 +172,7 @@ class Order(Base):
 
 
 # Rename to Item
-class OrderItem(Base, TimeStampedModelMixin):
+class OrderItem(Base):
     __tablename__ = 'order_items'
     __table_args__ = (UniqueConstraint(
         'item_id', 'order_id', 'lot_number', name='unique_order_item'), )
