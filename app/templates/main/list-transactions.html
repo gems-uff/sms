@@ -18,7 +18,7 @@
       <th width="10%">Lote</th>
       <th width="10%">Data da Transação</th>
       <th width="10%">Responsável</th>
-      <th width="10%">Ação</th>
+      <!-- <th width="10%">Ação</th> -->
     </tr>
   </thead>
   <tbody>
@@ -34,7 +34,7 @@
         <td>{{ transaction.lot_number|default('-', true) }}</td>
         <td>{{ moment(transaction.created_on).format('DD/MM/YYYY [-] HH:mm') }}</td>
         <td>{{ transaction.user.email }}</td>
-        <td><a href="{{ url_for('main.delete_transaction', transaction_id=transaction.id) }}">Desfazer (Não funciona ainda!)</a></td>
+        <!-- <td><a href="{{ url_for('main.delete_transaction', transaction_id=transaction.id) }}">Desfazer (Não funciona ainda!)</a></td> -->
       </tr>
     {% endfor %}
   </tbody>
