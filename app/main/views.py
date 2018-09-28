@@ -91,7 +91,7 @@ def purchase_product():
 
     if request.method == 'POST':
         if form.cancel.data is True:
-            clear_order_items_session()
+            svc.clear_order_items_session()
             return redirect(url_for('.purchase_product'))
         if form.finish_order.data is True:
             if order_items:
