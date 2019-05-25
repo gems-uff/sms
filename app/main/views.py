@@ -32,8 +32,15 @@ def index():
 def show_stock():
     template = 'main/index.html'
     products = svc.get_products_in_stock(svc.get_stock())
+
+    stock = svc.get_stock()
+    stock_products = sorted(
+        [sp for sp in stock.stock_products],
+        key=lambda sp: sp.product.name,
+    )
     return render_template(template,
-                           products=products)
+                           products=products,
+                           stock_products=stock_products)
 
 
 @blueprint.route('/catalog', methods=['GET'])
