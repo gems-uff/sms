@@ -6,6 +6,7 @@ from wtforms.validators import (DataRequired, InputRequired, NumberRange,
                                 Optional)
 
 from .models import Product, StockProduct, Transaction, Specification
+from app.auth.models import User
 
 
 class OrderItemForm(FlaskForm):
@@ -86,7 +87,7 @@ class ConsumeProductForm(FlaskForm):
                  | Quantidade: {sp.amount}
             ''')) for sp in stock_products
         ]
-        self.consumer_email.data = current_user.email if current_user else ''
+        self.consumer_id.choices = [(user.id, user.email) for user in User.query.order_by(User.email).all()]
 
     stock_product_id = wtf.SelectField(
         'Reativo', coerce=int, validators=[InputRequired()])
@@ -101,7 +102,11 @@ class ConsumeProductForm(FlaskForm):
         render_kw={'autocomplete': 'off'},
         default=1,
     )
-    consumer_email = wtf.StringField('Consumidor final', validators=[InputRequired()])
+    consumer_id = wtf.SelectField(
+        'Consumidor final',
+        coerce=int,
+        validators=[InputRequired()],
+    )
     submit = wtf.SubmitField('Confirmar')
 
 
