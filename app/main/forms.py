@@ -83,6 +83,7 @@ class ConsumeProductForm(FlaskForm):
                  | Lote: {sp.lot_number}
                  | Validade: {sp.expiration_date.strftime('%d-%m-%y')}
                  | Quantidade: {sp.amount}
+                 | Fabricante: {sp.manufacturer}
             ''')) for sp in stock_products
         ]
 
