@@ -1,6 +1,7 @@
 import wtforms as wtf
 import wtforms.widgets.html5 as widgets
 from flask_wtf import FlaskForm
+from flask_login import current_user
 from wtforms.validators import (DataRequired, InputRequired, NumberRange,
                                 Optional)
 
@@ -85,6 +86,7 @@ class ConsumeProductForm(FlaskForm):
                  | Quantidade: {sp.amount}
             ''')) for sp in stock_products
         ]
+        self.consumer_email.data = current_user.email if current_user else ''
 
     stock_product_id = wtf.SelectField(
         'Reativo', coerce=int, validators=[InputRequired()])
@@ -99,6 +101,7 @@ class ConsumeProductForm(FlaskForm):
         render_kw={'autocomplete': 'off'},
         default=1,
     )
+    consumer_email = wtf.StringField('Consumidor final', validators=[InputRequired()])
     submit = wtf.SubmitField('Confirmar')
 
 

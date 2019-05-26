@@ -9,7 +9,7 @@ from flask_login import current_user
 from app.extensions import db
 from app.logger import logger
 from app.auth.decorators import restrict_to_logged_users, permission_required
-from app.auth.models import Permission
+from app.auth.models import Permission, User
 from .models import (
     Order, OrderItem, Transaction, Stock, StockProduct, Product, Specification)
 from . import forms
@@ -209,10 +209,11 @@ def consume_product():
             amount = form.amount.data
             stock.subtract(product, lot_number, amount)
             logger.info('Commiting subtraction')
+            consumer_user = User.query.filter_by(email=form.consumer_email.data).first()
             db.session.commit()
             logger.info('Creating sub-transaction')
             svc.create_sub_transaction(
-                current_user,
+                consumer_user,
                 product,
                 lot_number,
                 amount,
