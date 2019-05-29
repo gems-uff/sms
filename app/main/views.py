@@ -35,7 +35,7 @@ def show_stock():
 
     stock = svc.get_stock()
     stock_products = sorted(
-        [sp for sp in stock.stock_products],
+        [sp for sp in stock.stock_products if sp.amount > 0],
         key=lambda sp: sp.product.name,
     )
     return render_template(template,

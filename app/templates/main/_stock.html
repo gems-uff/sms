@@ -9,7 +9,7 @@
   <select class="form-control" id="search-product" name="search-product">
     <option value="#">...</option>
     {% for sp in stock_products %}
-    <option value="{{ url_for('main.detail_product', product_id=sp.id, _external='True' ) }}">
+    <option value="{{ url_for('main.detail_product', product_id=sp.product.id, _external='True' ) }}">
       {{ sp.product.name }} | Lote: {{ sp.lot_number }} | Validade: {{ sp.expiration_date }} | Quantidade: {{ sp.amount }}
     </option>
     {% endfor %}
