@@ -3,6 +3,12 @@
 - [Production app](https://sms-lvrs.herokuapp.com)
 - [Staging app](https://sms-lvrs.herokuapp.com)
 
+## 1.2.0 - 2019-08-18
+
+- Show manufacturer on consume item page
+- Allow to set who is the responsible for a transaction
+
+
 ## 1.1.1 - 2018-09-28
 
 ### Bug Fixes

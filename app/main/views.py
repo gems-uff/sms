@@ -9,7 +9,7 @@ from flask_login import current_user
 from app.extensions import db
 from app.logger import logger
 from app.auth.decorators import restrict_to_logged_users, permission_required
-from app.auth.models import Permission
+from app.auth.models import Permission, User
 from .models import (
     Order, OrderItem, Transaction, Stock, StockProduct, Product, Specification)
 from . import forms
@@ -32,8 +32,15 @@ def index():
 def show_stock():
     template = 'main/index.html'
     products = svc.get_products_in_stock(svc.get_stock())
+
+    stock = svc.get_stock()
+    stock_products = sorted(
+        [sp for sp in stock.stock_products if sp.amount > 0],
+        key=lambda sp: sp.product.name,
+    )
     return render_template(template,
-                           products=products)
+                           products=products,
+                           stock_products=stock_products)
 
 
 @blueprint.route('/catalog', methods=['GET'])
@@ -191,6 +198,8 @@ def consume_product():
         [sp for sp in stock.stock_products if sp.amount > 0],
         key=lambda sp: sp.product.name,
     )
+    for stock_product in stock_products:
+        stock_product.manufacturer = svc.get_manufacturer_by_lot_number(stock_product.lot_number)
     form_context = {
         'stock_products': stock_products,
     }
@@ -209,10 +218,11 @@ def consume_product():
             amount = form.amount.data
             stock.subtract(product, lot_number, amount)
             logger.info('Commiting subtraction')
+            consumer_user = User.query.filter_by(email=form.consumer_email.data).first()
             db.session.commit()
             logger.info('Creating sub-transaction')
             svc.create_sub_transaction(
-                current_user,
+                consumer_user,
                 product,
                 lot_number,
                 amount,
