@@ -198,6 +198,8 @@ def consume_product():
         [sp for sp in stock.stock_products if sp.amount > 0],
         key=lambda sp: sp.product.name,
     )
+    for stock_product in stock_products:
+        stock_product.manufacturer = svc.get_manufacturer_by_lot_number(stock_product.lot_number)
     form_context = {
         'stock_products': stock_products,
     }

@@ -85,6 +85,7 @@ class ConsumeProductForm(FlaskForm):
                  | Lote: {sp.lot_number}
                  | Validade: {sp.expiration_date.strftime('%d-%m-%y')}
                  | Quantidade: {sp.amount}
+                 | Fabricante: {sp.manufacturer}
             ''')) for sp in stock_products
         ]
         self.consumer_id.choices = [(user.id, user.email) for user in User.query.order_by(User.email).all()]

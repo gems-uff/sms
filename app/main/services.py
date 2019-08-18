@@ -21,6 +21,12 @@ def get_products_in_stock(stock):
         p.total = stock.total(p)
     return products
 
+def get_manufacturer_by_lot_number(lot_number):
+    spec = db.session.query(Specification).join(OrderItem).filter_by(
+        lot_number=lot_number
+    ).first()
+    return spec.manufacturer or ''
+
 
 def get_specifications():
     return db.session.query(Specification).join(Product).order_by(
