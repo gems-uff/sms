@@ -218,7 +218,7 @@ def consume_product():
             amount = form.amount.data
             stock.subtract(product, lot_number, amount)
             logger.info('Commiting subtraction')
-            consumer_user = User.query.filter_by(email=form.consumer_email.data).first()
+            consumer_user = User.query.filter_by(id=form.consumer_id.data).first()
             db.session.commit()
             logger.info('Creating sub-transaction')
             svc.create_sub_transaction(
