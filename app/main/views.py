@@ -198,8 +198,10 @@ def consume_product():
         [sp for sp in stock.stock_products if sp.amount > 0],
         key=lambda sp: sp.product.name,
     )
+
     for stock_product in stock_products:
         stock_product.manufacturer = svc.get_manufacturer_by_lot_number(stock_product.lot_number)
+
     form_context = {
         'stock_products': stock_products,
     }
@@ -207,38 +209,41 @@ def consume_product():
 
     if form.validate_on_submit():
         logger.info('POSTing a valid form to consume_product')
-        logger.info('Creating a new SUB Transaction')
         try:
-            selected_stock_product = StockProduct.query.get(
-                form.stock_product_id.data)
-            logger.info(
-                'Retrieving info from selected_stock_product')
+            selected_stock_product = StockProduct.query.get(form.stock_product_id.data)
+            logger.info('Retrieving info from selected_stock_product: {}'.format(selected_stock_product))
             product = selected_stock_product.product
             lot_number = selected_stock_product.lot_number
             amount = form.amount.data
             stock.subtract(product, lot_number, amount)
-            logger.info('Commiting subtraction')
+            logger.info('subtracted {} | {} | {} from stock'.format(product, lot_number, amount))
             consumer_user = User.query.filter_by(id=form.consumer_id.data).first()
-            db.session.commit()
-            logger.info('Creating sub-transaction')
-            svc.create_sub_transaction(
+            # db.session.commit()
+            transaction = svc.create_sub_transaction(
                 consumer_user,
                 product,
                 lot_number,
                 amount,
                 stock
             )
+            db.session.add(transaction)
+            logger.info('sub_transaction added to session.')
+
+            logger.info('commiting session')
+            db.session.commit()
+
             flash('{} unidades de {} removidas do estoque com sucesso!'.format(
                 form.amount.data, selected_stock_product.product.name),
                 'success',
             )
-
             return redirect(url_for('.consume_product'))
         except ValueError as err:
             logger.error(err)
-            form.amount.errors.append(
-                'Não há o suficiente desse reativo em estoque.')
-        except Exception:
+            form.amount.errors.append('Não há o suficiente desse reativo em estoque.')
+            db.session.rollback()
+        except Exception as err:
+            logger.error(err)
+            db.session.rollback()
             flash('Erro inesperado, contate o administrador.', 'danger')
 
     return render_template('main/consume-product.html', form=form)

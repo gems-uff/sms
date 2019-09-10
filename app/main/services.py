@@ -58,8 +58,7 @@ def create_sub_transaction(user, product, lot_number, amount, stock):
     transaction.stock = stock
     transaction.category = Transaction.SUB
 
-    db.session.add(transaction)
-    db.session.commit()
+    return transaction
 
 
 def get_product_by_name(name):
